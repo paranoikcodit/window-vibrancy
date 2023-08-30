@@ -117,6 +117,23 @@ pub fn clear_acrylic(window: impl raw_window_handle::HasRawWindowHandle) -> Resu
     }
 }
 
+pub fn apply_mica_alt(
+    window: impl raw_window_handle::HasRawWindowHandle,
+    dark: Option<bool>,
+) -> Result<(), Error> {
+    #[cfg(not(target_os = "windows"))]
+    let _ = dark;
+    match window.raw_window_handle() {
+        #[cfg(target_os = "windows")]
+        raw_window_handle::RawWindowHandle::Win32(handle) => {
+            windows::apply_mica_alt(handle.hwnd as _, dark)
+        }
+        _ => Err(Error::UnsupportedPlatform(
+            "\"apply_mica()\" is only supported on Windows.",
+        )),
+    }
+}
+
 /// Applies mica effect to window. Works only on Windows 11.
 ///
 /// ## Arguments
