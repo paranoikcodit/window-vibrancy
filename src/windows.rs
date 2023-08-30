@@ -109,6 +109,40 @@ pub fn clear_acrylic(hwnd: HWND) -> Result<(), Error> {
     Ok(())
 }
 
+pub fn apply_mica_alt(hwnd: HWND, dark: Option<bool>) -> Result<(), Error> {
+    if let Some(dark) = dark {
+        unsafe {
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_USE_IMMERSIVE_DARK_MODE,
+                &(dark as u32) as *const _ as _,
+                4,
+            );
+        }
+    }
+
+    if is_backdroptype_supported() {
+        unsafe {
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_SYSTEMBACKDROP_TYPE,
+                &DWM_SYSTEMBACKDROP_TYPE::DWMSBT_TABBEDWINDOW as *const _ as _,
+                4,
+            );
+        }
+    } else if is_undocumented_mica_supported() {
+        unsafe {
+            DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &1 as *const _ as _, 4);
+        }
+    } else {
+        return Err(Error::UnsupportedPlatformVersion(
+            "\"apply_mica()\" is only available on Windows 11.",
+        ));
+    }
+
+    Ok(())
+}
+
 pub fn apply_mica(hwnd: HWND, dark: Option<bool>) -> Result<(), Error> {
     if let Some(dark) = dark {
         unsafe {
